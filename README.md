@@ -87,7 +87,7 @@ This application implements an end-to-end data pipeline following the Growi engi
          │ ActiveRecord
          ▼
 ┌─────────────────────────────────────┐
-│  PostgreSQL/SQLite Database         │
+│  PostgreSQL Database                │
 │  - tik_tok_shop_products            │
 │  - tik_tok_shop_product_snapshots   │
 └────────┬────────────────────────────┘
@@ -118,12 +118,41 @@ This application implements an end-to-end data pipeline following the Growi engi
 - **Ruby**: 3.2+ (see `.ruby-version`)
 - **Rails**: 8.1+
 - **Node.js**: 18+ (for encryption/signing)
-- **Database**: PostgreSQL (production) or SQLite (development)
+- **Database**: PostgreSQL
 - **npm packages**: axios
 
 ---
 
 ## 🚀 Installation
+
+### 0. Prerequisites
+
+**PostgreSQL Required** - This application uses PostgreSQL. You need it installed and running:
+
+**Option 1: Local PostgreSQL**
+```bash
+# macOS
+brew install postgresql
+brew services start postgresql
+
+# Windows
+# Download from: https://www.postgresql.org/download/windows/
+# Or use: winget install PostgreSQL.PostgreSQL
+
+# Linux
+sudo apt-get install postgresql postgresql-contrib
+sudo systemctl start postgresql
+```
+
+**Option 2: External PostgreSQL**
+- Use a hosted service (Heroku Postgres, AWS RDS, etc.)
+- Update `config/database.yml` with your connection details
+
+**Verify PostgreSQL is running:**
+```bash
+psql --version  # Should show version 12+
+psql -U postgres -c "SELECT 1"  # Test connection
+```
 
 ### 1. Install Dependencies
 
@@ -659,10 +688,41 @@ TikTok may rate limit requests. Consider:
 
 ---
 
+## � Design Tradeoffs
+
+### 1. **Node.js for Signing vs Pure Ruby**
+- ✅ **Chose**: Node.js subprocess for X-Bogus/X-Gnarly generation
+- **Why**: Encryption logic already implemented in JavaScript, easier to maintain
+- **Tradeoff**: Extra process overhead vs rewriting complex crypto in Ruby
+
+### 2. **Daily Snapshots vs Running Totals**
+- ✅ **Chose**: One row per product per day
+- **Why**: Enables historical analysis, trend detection, day-over-day comparison
+- **Tradeoff**: More storage space vs query flexibility
+
+### 3. **Synchronous Day-by-Day Sync vs Parallel**
+- ✅ **Chose**: Sequential date iteration
+- **Why**: Simpler error handling, respects rate limits, easier to debug
+- **Tradeoff**: Slower backfills vs code complexity
+
+### 4. **In-Database Aggregation vs Application Layer**
+- ✅ **Chose**: SQL SUM() with GROUP BY
+- **Why**: Faster for large datasets, leverages database indexes
+- **Tradeoff**: Requires PostgreSQL-specific knowledge vs framework-agnostic code
+
+### 5. **PostgreSQL vs SQLite**
+- ✅ **Chose**: PostgreSQL for all environments
+- **Why**: Production-grade constraints, better concurrent writes, same dev/prod setup
+- **Tradeoff**: Requires PostgreSQL installation vs zero-config SQLite
+
+---
+
 ## 📝 Known Limitations
 
 - **Cookie Expiration**: Session cookies expire ~24 hours, requires manual refresh
 - **Timezone**: Currently hardcoded to PST (-28800)
+- **Single Region**: Only US region supported (would need separate endpoint configs for other regions)
+- **No Background Queue**: Uses inline job execution, production would need Sidekiq/Redis
 
 ---
 📄 Trial Task Notes
