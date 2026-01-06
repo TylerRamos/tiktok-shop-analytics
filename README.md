@@ -6,6 +6,8 @@
 
 ## 🚀 Quick Start (Evaluator Guide)
 
+**Prerequisites:** PostgreSQL must be installed and running (see [Installation](#0-prerequisites) for setup)
+
 ```bash
 # 1. Install dependencies
 bundle install && npm install
@@ -17,10 +19,7 @@ rails db:create db:migrate
 rails server
 # → Server runs at http://localhost:3000
 
-# 4. Test the sync (edit script/test_sync.rb with your TikTok credentials first)
-ruby script/test_sync.rb
-
-# 5. Query the API
+# 4. Query the API
 curl "http://localhost:3000/api/v1/tik_tok_shops/1/product_analytics?start_date=2025-12-23&end_date=2025-12-25"
 ```
 
@@ -261,13 +260,6 @@ SyncProductAnalyticsJob.perform_now(
   oec_seller_id: "7496020242935155064",
   fp: "verify_mgtck5di_..."
 )
-```
-
-#### Option 2: Test Script
-
-```bash
-# Edit script/test_sync.rb with your credentials
-ruby script/test_sync.rb
 ```
 
 ### Starting the Rails Server
@@ -553,9 +545,6 @@ db/
 
 config/
 └── routes.rb                              # API routes
-
-script/
-└── test_sync.rb                           # Manual test script
 ```
 
 ### Running Tests
