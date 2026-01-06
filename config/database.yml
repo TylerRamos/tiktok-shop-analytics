@@ -1,0 +1,24 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: tiktok_shop_analytics_development
+  username: postgres
+  password: password
+  host: localhost
+
+test:
+  <<: *default
+  database: tiktok_shop_analytics_test
+  username: postgres
+  password: password
+  host: localhost
+
+production:
+  <<: *default
+  database: tiktok_shop_analytics_production
+  username: postgres
+  password: <%= ENV["DATABASE_PASSWORD"] %>
